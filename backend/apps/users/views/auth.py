@@ -22,7 +22,6 @@ class LoginView(TokenObtainPairView):
     """
     serializer_class = CustomTokenObtainPairSerializer
     permission_classes = [AllowAny]
-    swagger_tags = ['Authentication']
 
     @swagger_auto_schema(
         tags=['Authentication'],
@@ -45,38 +44,11 @@ class LoginView(TokenObtainPairView):
                     }
                 }
             ),
-            400: "Credenciales inválidas"
+            401: "Credenciales inválidas"
         }
     )
     def post(self, request, *args, **kwargs):
-        """
-        POST /api/auth/login
-        Returns access and refresh tokens
-        """
-        # Validate credentials
-        serializer = LoginSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-
-        user = serializer.validated_data['user']
-
-        # Generate tokens
-        refresh = RefreshToken.for_user(user)
-
-        # Generate full name
-        full_name = f"{user.first_name} {user.last_name}".strip() or user.username
-
-        return Response({
-            'access': str(refresh.access_token),
-            'refresh': str(refresh),
-            'token_type': 'bearer',
-            'user': {
-                'id': user.id,
-                'email': user.email,
-                'username': user.username,
-                'full_name': full_name,
-                'is_superuser': user.is_superuser,
-            }
-        }, status=status.HTTP_200_OK)
+        return super().post(request, *args, **kwargs)
 
 
 class LogoutView(APIView):

@@ -2,31 +2,57 @@
 User model based on UML diagram
 User = Persona (todos son usuarios: empleados, clientes, proveedores, etc.)
 """
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
 from apps.core.models import TimeStampedModel
+
+
+class UserManager(BaseUserManager):
+    """
+    Custom user manager where email is the unique identifier for authentication.
+    """
+    def create_user(self, email, password=None, **extra_fields):
+        """
+        Create and save a User with the given email and password.
+        """
+        if not email:
+            raise ValueError('The Email must be set')
+        email = self.normalize_email(email)
+        
+        # Use email part as username, ensuring uniqueness
+        username = email.split('@')[0]
+        counter = 1
+        temp_username = username
+        while self.model.objects.filter(username=temp_username).exists():
+            temp_username = f"{username}{counter}"
+            counter += 1
+        username = temp_username
+
+        user = self.model(username=username, email=email, **extra_fields)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+    def create_superuser(self, email, password=None, **extra_fields):
+        """
+        Create and save a SuperUser with the given email and password.
+        """
+        extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_superuser', True)
+        extra_fields.setdefault('is_active', True)
+
+        if extra_fields.get('is_staff') is not True:
+            raise ValueError('Superuser must have is_staff=True.')
+        if extra_fields.get('is_superuser') is not True:
+            raise ValueError('Superuser must have is_superuser=True.')
+
+        return self.create_user(email, password, **extra_fields)
 
 
 class User(AbstractUser, TimeStampedModel):
     """
     Custom User model.
     Extends Django's AbstractUser with created_at/updated_at timestamps.
-
-    Fields from AbstractUser:
-    - username: VARCHAR(150) unique
-    - email: VARCHAR(254) unique
-    - password: VARCHAR(128)
-    - first_name: VARCHAR(150)
-    - last_name: VARCHAR(150)
-    - is_active: BOOLEAN
-    - is_staff: BOOLEAN
-    - is_superuser: BOOLEAN
-    - date_joined: TIMESTAMP
-    - last_login: TIMESTAMP nullable
-
-    Additional fields from TimeStampedModel:
-    - created_at: TIMESTAMP
-    - updated_at: TIMESTAMP
     """
     # User Types
     class UserType(models.TextChoices):
@@ -109,7 +135,10 @@ class User(AbstractUser, TimeStampedModel):
 
     # We'll use email as the main identifier
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['username']
+    REQUIRED_FIELDS = []
+
+    # Use the custom manager
+    objects = UserManager()
 
     class Meta:
         db_table = 'users_user'

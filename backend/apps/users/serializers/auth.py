@@ -38,9 +38,32 @@ class LoginSerializer(serializers.Serializer):
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     """
-    Custom token serializer to use email instead of username
+    Custom token serializer to use email and add user data to the response.
     """
     username_field = 'email'
+
+    def validate(self, attrs):
+        # The default result is `{'access': ..., 'refresh': ...}`
+        data = super().validate(attrs)
+
+        # Add user information to the response
+        full_name = f"{self.user.first_name} {self.user.last_name}".strip() or self.user.username
+        data['user'] = {
+            'id': self.user.id,
+            'email': self.user.email,
+            'username': self.user.username,
+            'full_name': full_name,
+            'is_superuser': self.user.is_superuser,
+        }
+        data['token_type'] = 'bearer'
+        
+        # Reorder keys to match original output
+        return {
+            'access': data['access'],
+            'refresh': data['refresh'],
+            'token_type': data['token_type'],
+            'user': data['user']
+        }
 
 
 class RegisterSerializer(serializers.Serializer):

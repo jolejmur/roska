@@ -1,0 +1,23 @@
+// 1. Override Bootstrap's default variables
+// This is where we define our new green color palette.
+
+$primary:       #16a34a; // Green 600
+$primary-dark:  #15803d; // Green 700
+$primary-light: #22c55e; // Green 500
+
+// 2. Create the theme map
+// Bootstrap uses this map to generate all its color-related classes (e.g., btn-primary, text-primary).
+$theme-colors: (
+  "primary":    $primary,
+  "secondary":  #6c757d,
+  "success":    #198754,
+  "info":       #0dcaf0,
+  "warning":    #ffc107,
+  "danger":     #dc3545,
+  "light":      #f8f9fa,
+  "dark":       #212529
+);
+
+// 3. Import the rest of Bootstrap to apply the theme.
+// We are now importing the source files, not the pre-compiled CSS.
+@import 'bootstrap/scss/bootstrap';

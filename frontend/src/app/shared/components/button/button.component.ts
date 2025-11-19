@@ -26,7 +26,8 @@ import { CommonModule } from '@angular/common';
     .btn-primary {
       width: 100%;
       padding: 0.875rem;
-      background: linear-gradient(135deg, #a855f7, #9333ea);
+      /* Cambiar gradiente morado a verde */
+      background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
       border: none;
       border-radius: 10px;
       color: white;
@@ -37,9 +38,11 @@ import { CommonModule } from '@angular/common';
     }
 
     .btn-primary:hover:not(:disabled) {
-      background: linear-gradient(135deg, #9333ea, #7e22ce);
+      /* Cambiar hover a un verde más oscuro */
+      background: linear-gradient(135deg, var(--color-primary-dark), #14532d);
       transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(168, 85, 247, 0.3);
+      /* Sombra verde */
+      box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3);
     }
 
     .btn-primary:disabled {

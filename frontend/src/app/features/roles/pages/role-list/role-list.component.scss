@@ -24,7 +24,7 @@
   gap: 0.75rem;
 
   i {
-    color: #8b5cf6;
+    color: var(--color-primary);
   }
 }
 
@@ -40,7 +40,7 @@
 
 .btn-primary {
   padding: 0.625rem 1.25rem;
-  background: #8b5cf6;
+  background: var(--color-primary);
   color: white;
   border: none;
   border-radius: 8px;
@@ -53,7 +53,7 @@
   transition: all 0.2s;
 
   &:hover {
-    background: #7c3aed;
+    background: var(--color-primary-dark);
   }
 
   &:disabled {
@@ -106,7 +106,7 @@
     gap: 0.5rem;
 
     i {
-      color: #8b5cf6;
+      color: var(--color-primary);
     }
   }
 }
@@ -165,8 +165,8 @@
 
       &:focus {
         outline: none;
-        border-color: #8b5cf6;
-        box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+        border-color: var(--color-primary);
+        box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1);
       }
 
       &[readonly] {
@@ -215,7 +215,7 @@
   }
 
   i {
-    color: #8b5cf6;
+    color: var(--color-primary);
     width: 14px;
     transition: transform 0.2s;
   }
@@ -259,7 +259,7 @@
     margin: 0;
 
     i {
-      color: #8b5cf6;
+      color: var(--color-primary);
       width: 16px;
     }
   }
@@ -315,7 +315,7 @@
 }
 
 .loading-state i {
-  color: #8b5cf6;
+  color: var(--color-primary);
 }
 
 .error-state i {
@@ -351,7 +351,7 @@
       transition: background-color 0.2s;
 
       &:hover {
-        background-color: #faf5ff;
+        background-color: #f0fdf4;
       }
 
       &.editing-row {
@@ -376,7 +376,7 @@
   gap: 0.5rem;
 
   i {
-    color: #8b5cf6;
+    color: var(--color-primary);
   }
 }
 
@@ -388,7 +388,7 @@
   border-radius: 6px;
   font-family: 'Courier New', monospace;
   font-size: 0.8125rem;
-  color: #6b46c1;
+  color: var(--color-primary-dark);
 }
 
 .description {
@@ -447,15 +447,15 @@
 .edit-textarea {
   width: 100%;
   padding: 0.5rem 0.75rem;
-  border: 2px solid #8b5cf6;
+  border: 2px solid var(--color-primary);
   border-radius: 6px;
   font-size: 0.875rem;
   transition: all 0.2s;
 
   &:focus {
     outline: none;
-    border-color: #7c3aed;
-    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+    border-color: var(--color-primary-dark);
+    box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1);
   }
 
   &.small {
@@ -536,7 +536,7 @@
     gap: 0.5rem;
 
     i {
-      color: #8b5cf6;
+      color: var(--color-primary);
     }
   }
 }
@@ -558,7 +558,7 @@
   font-size: 0.875rem;
 
   i {
-    color: #8b5cf6;
+    color: var(--color-primary);
     width: 16px;
   }
 
@@ -605,7 +605,7 @@
   }
 
   i {
-    color: #8b5cf6;
+    color: var(--color-primary);
     width: 14px;
   }
 
@@ -648,7 +648,7 @@
     margin: 0;
 
     i {
-      color: #8b5cf6;
+      color: var(--color-primary);
       width: 14px;
     }
   }

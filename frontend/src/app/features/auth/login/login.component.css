@@ -1,6 +1,8 @@
 :host {
-  --primary-color: #a855f7;
-  --primary-hover: #9333ea;
+  /* ELIMINA las variables locales de color morado para que use las globales */
+  /* Usemos las variables CSS globales que definiste en _variables.scss */
+  --primary-color: var(--color-primary); 
+  --primary-hover: var(--color-primary-dark);
   --text-dark: #1f2937;
   --text-gray: #6b7280;
   --text-light: #9ca3af;
@@ -46,7 +48,8 @@
 .logo-icon {
   width: 40px;
   height: 40px;
-  background: linear-gradient(135deg, var(--primary-color), #c084fc);
+  /* Cambiar a verde */
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light));
   border-radius: 10px;
   display: flex;
   align-items: center;
@@ -87,7 +90,8 @@
 
 .form-control:focus {
   border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.1);
+  /* Cambiar la sombra morada a verde (rgba aproximado de tu verde) */
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1);
   outline: none;
 }
 
@@ -213,10 +217,11 @@
   margin-top: 0.25rem;
 }
 
-/* Sección Visual */
+/* Sección Visual (El fondo grande) */
 .visual-section {
   flex: 1;
-  background: linear-gradient(135deg, #a855f7 0%, #9333ea 50%, #7e22ce 100%);
+  /* CAMBIO IMPORTANTE: Gradiente verde oscuro */
+  background: linear-gradient(135deg, var(--color-primary-dark) 0%, var(--color-primary) 50%, #14532d 100%);
   position: relative;
   display: flex;
   flex-direction: column;

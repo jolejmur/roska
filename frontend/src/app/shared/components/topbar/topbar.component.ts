@@ -53,6 +53,51 @@ import { AuthService } from '../../../core/services/auth.service';
     </nav>
   `,
   styles: [`
+    /* ... */
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+      /* Cambiar a Verde */
+      background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light));
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+    }
+    
+    /* ... */
+
+    .sidebar-toggle.active {
+      background-color: #f0fdf4;
+      color: var(--color-primary);
+      border: 2px solid var(--color-primary);
+    }
+    
+    .search-box input:focus {
+      outline: none;
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1);
+    }
+
+    /* ... */
+
+    .badge-notify {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background-color: var(--color-primary); /* Cambiar a variable */
+      color: white;
+      border-radius: 10px;
+      padding: 2px 6px;
+      font-size: 10px;
+      font-weight: 600;
+    }
+
+    .user-profile:hover {
+      background-color: #f0fdf4;
+    }
+    
     .topbar {
       background-color: #ffffff;
       border-bottom: 1px solid #e5e7eb;
@@ -83,17 +128,6 @@ import { AuthService } from '../../../core/services/auth.service';
       opacity: 0.8;
     }
 
-    .logo-icon {
-      width: 40px;
-      height: 40px;
-      background: linear-gradient(135deg, #8b5cf6, #a78bfa);
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-    }
-
     .sidebar-toggle {
       border: none;
       background: none;
@@ -109,12 +143,6 @@ import { AuthService } from '../../../core/services/auth.service';
       background-color: #f3f4f6;
     }
 
-    .sidebar-toggle.active {
-      background-color: #fef3c7;
-      color: #f59e0b;
-      border: 2px solid #fbbf24;
-    }
-
     .search-box {
       flex: 0 0 250px;
       position: relative;
@@ -126,12 +154,6 @@ import { AuthService } from '../../../core/services/auth.service';
       border: 1px solid #e5e7eb;
       border-radius: 8px;
       font-size: 0.875rem;
-    }
-
-    .search-box input:focus {
-      outline: none;
-      border-color: #8b5cf6;
-      box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
     }
 
     .search-box i {
@@ -166,18 +188,6 @@ import { AuthService } from '../../../core/services/auth.service';
       background-color: #f3f4f6;
     }
 
-    .badge-notify {
-      position: absolute;
-      top: 8px;
-      right: 8px;
-      background-color: #8b5cf6;
-      color: white;
-      border-radius: 10px;
-      padding: 2px 6px;
-      font-size: 10px;
-      font-weight: 600;
-    }
-
     .user-profile {
       display: flex;
       align-items: center;
@@ -186,10 +196,6 @@ import { AuthService } from '../../../core/services/auth.service';
       padding: 0.25rem 0.5rem;
       border-radius: 8px;
       transition: background-color 0.2s;
-    }
-
-    .user-profile:hover {
-      background-color: #f3f4f6;
     }
 
     .user-avatar {

@@ -25,7 +25,7 @@
   gap: 0.75rem;
 
   i {
-    color: #8b5cf6;
+    color: var(--color-primary); /* Antes #8b5cf6 */
   }
 }
 
@@ -41,19 +41,20 @@
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   margin-bottom: 1.5rem;
-  border: 2px solid #8b5cf6;
+  border: 2px solid var(--color-primary); /* Antes #8b5cf6 */
 }
 
 .info-note {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(37, 99, 235, 0.05));
-  border: 1px solid rgba(59, 130, 246, 0.2);
+  /* Ajustar el fondo azul/morado a verde si deseas */
+  background: linear-gradient(135deg, rgba(22, 163, 74, 0.1), rgba(21, 128, 61, 0.05));
+  border: 1px solid rgba(22, 163, 74, 0.2);
+  color: var(--color-primary-dark);
   padding: 1rem 1.5rem;
   border-radius: 8px;
   margin-bottom: 1rem;
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  color: #1e40af;
   font-size: 0.875rem;
 
   i {
@@ -126,8 +127,8 @@
 
       &:focus {
         outline: none;
-        border-color: #8b5cf6;
-        box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+        border-color: var(--color-primary);
+        box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1);
       }
 
       &:disabled {
@@ -201,8 +202,8 @@
 
     &:focus {
       outline: none;
-      border-color: #8b5cf6;
-      box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1);
     }
   }
 }
@@ -230,8 +231,8 @@
 
     &:focus {
       outline: none;
-      border-color: #8b5cf6;
-      box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1);
     }
   }
 }
@@ -269,7 +270,7 @@
 }
 
 .loading-state i {
-  color: #8b5cf6;
+  color: var(--color-primary);
 }
 
 .table-responsive {
@@ -331,7 +332,7 @@
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #8b5cf6, #a78bfa);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light));
   color: white;
   display: flex;
   align-items: center;
@@ -380,8 +381,8 @@
 }
 
 .badge-primary {
-  background: rgba(139, 92, 246, 0.1);
-  color: #8b5cf6;
+  background: rgba(22, 163, 74, 0.1);
+  color: var(--color-primary);
 }
 
 .badge-success {
@@ -589,7 +590,7 @@
 
 .btn-add-role {
   padding: 0.375rem 0.75rem;
-  background: #8b5cf6;
+  background: var(--color-primary);
   color: white;
   border: none;
   border-radius: 6px;
@@ -602,7 +603,7 @@
   transition: all 0.2s;
 
   &:hover {
-    background: #7c3aed;
+    background: var(--color-primary-dark);
   }
 
   i {
@@ -635,12 +636,12 @@
   transition: all 0.2s;
 
   &:focus-within {
-    border-color: #8b5cf6;
-    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1);
   }
 
   .role-icon {
-    color: #8b5cf6;
+    color: var(--color-primary);
     font-size: 1rem;
   }
 }

@@ -115,6 +115,21 @@ import { ButtonComponent } from '../../shared/components/button/button.component
     </div>
   `,
   styles: [`
+    /* ... */
+    .profile-header {
+      /* Cambiar a gradiente Verde */
+      background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+      padding: 3rem 2rem;
+      text-align: center;
+      color: white;
+    }
+    /* ... */
+    .permission-card.active {
+      border-color: var(--color-primary);
+      background: linear-gradient(135deg, rgba(22, 163, 74, 0.1), rgba(21, 128, 61, 0.1));
+      color: var(--color-primary);
+    }
+    
     .profile-wrapper {
       display: flex;
       align-items: flex-start;
@@ -130,13 +145,6 @@ import { ButtonComponent } from '../../shared/components/button/button.component
       width: 100%;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
       overflow: hidden;
-    }
-
-    .profile-header {
-      background: linear-gradient(135deg, #a855f7 0%, #9333ea 100%);
-      padding: 3rem 2rem;
-      text-align: center;
-      color: white;
     }
 
     .avatar-container {
@@ -256,12 +264,6 @@ import { ButtonComponent } from '../../shared/components/button/button.component
       text-align: center;
       transition: all 0.3s;
       color: #9ca3af;
-    }
-
-    .permission-card.active {
-      border-color: #a855f7;
-      background: linear-gradient(135deg, rgba(168, 85, 247, 0.1), rgba(147, 51, 234, 0.1));
-      color: #a855f7;
     }
 
     .permission-card i {

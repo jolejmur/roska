@@ -1,0 +1,104 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  db:
+    image: postgres:15-alpine
+    container_name: roska_db
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-roska_db}
+      POSTGRES_USER: ${POSTGRES_USER:-roska_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-roska_password}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - roska_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-roska_user}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Cerbos Policy Decision Point
+  cerbos:
+    image: ghcr.io/cerbos/cerbos:latest
+    container_name: roska_cerbos
+    command: server --config=/config/config.yaml
+    volumes:
+      - ./backend/cerbos:/config:ro
+    ports:
+      - "3592:3592"  # HTTP
+      - "3593:3593"  # gRPC
+    networks:
+      - roska_network
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "http://localhost:3592/_cerbos/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis for Celery
+  redis:
+    image: redis:7-alpine
+    container_name: roska_redis
+    ports:
+      - "6379:6379"
+    networks:
+      - roska_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Django Backend
+  backend:
+    build:
+      context: ./backend
+      dockerfile: ../docker/backend/Dockerfile.dev
+    container_name: roska_backend
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./backend:/app
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      - DJANGO_SETTINGS_MODULE=config.settings.development
+    depends_on:
+      db:
+        condition: service_healthy
+      cerbos:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - roska_network
+
+  # Angular Frontend (development)
+  frontend:
+    image: node:20-alpine
+    container_name: roska_frontend
+    working_dir: /app
+    command: sh -c "npm install && npm start"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - "4200:4200"
+    environment:
+      - NODE_ENV=development
+    depends_on:
+      - backend
+    networks:
+      - roska_network
+
+volumes:
+  postgres_data:
+
+networks:
+  roska_network:
+    driver: bridge

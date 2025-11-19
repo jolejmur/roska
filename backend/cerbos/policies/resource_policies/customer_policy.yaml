@@ -1,0 +1,44 @@
+---
+apiVersion: api.cerbos.dev/v1
+resourcePolicy:
+  version: "default"
+  resource: "customer"
+  rules:
+    # Super Admin puede hacer TODO con cualquier cliente
+    - actions: ['create', 'read', 'update', 'delete', 'list']
+      effect: EFFECT_ALLOW
+      roles:
+        - "*"
+      condition:
+        match:
+          expr: request.principal.attr.is_superuser == true
+
+    # Staff/Admin pueden hacer TODO con clientes
+    - actions: ['create', 'read', 'update', 'delete', 'list']
+      effect: EFFECT_ALLOW
+      roles:
+        - "ADMIN"
+        - "admin"
+      condition:
+        match:
+          expr: request.principal.attr.is_staff == true
+
+    # Los clientes pueden ver y actualizar SOLO su propio perfil (modo consulta)
+    - actions: ['read', 'update']
+      effect: EFFECT_ALLOW
+      roles:
+        - "customer"
+        - "CUSTOMER"
+      condition:
+        match:
+          expr: request.resource.id == request.principal.id
+
+    # Los clientes pueden ver su propia información en la lista
+    - actions: ['list']
+      effect: EFFECT_ALLOW
+      roles:
+        - "customer"
+        - "CUSTOMER"
+      condition:
+        match:
+          expr: request.principal.attr.user_type == "CUSTOMER"

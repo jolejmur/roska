@@ -1,0 +1,216 @@
+<div class="customer-list-container">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <h1 class="page-title">
+        <i class="fas fa-user-friends"></i>
+        Gestión de Clientes
+      </h1>
+      <p class="page-subtitle">Administra los clientes del sistema</p>
+    </div>
+    <app-button
+      *ngIf="canEditCustomer()"
+      variant="primary"
+      [routerLink]="['/customers/new']">
+      <i class="fas fa-plus"></i>
+      Nuevo Cliente
+    </app-button>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters-card">
+    <div class="filters-row">
+      <div class="search-box">
+        <i class="fas fa-search"></i>
+        <input
+          type="text"
+          placeholder="Buscar por nombre, email, código, RUC/NIT..."
+          [ngModel]="searchTerm()"
+          (ngModelChange)="searchTerm.set($event)"
+          (keyup.enter)="onSearch()">
+      </div>
+
+      <div class="filter-group">
+        <label>Estado</label>
+        <select [ngModel]="filterStatus()" (ngModelChange)="filterStatus.set($event); onFilterChange()">
+          <option value="all">Todos</option>
+          <option value="active">Activos</option>
+          <option value="inactive">Inactivos</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label>Tipo</label>
+        <select [ngModel]="filterType()" (ngModelChange)="filterType.set($event); onFilterChange()">
+          <option value="all">Todos</option>
+          <option value="INDIVIDUAL">Persona Natural</option>
+          <option value="BUSINESS">Empresa</option>
+        </select>
+      </div>
+
+      <app-button variant="primary" (clicked)="onSearch()">
+        <i class="fas fa-filter"></i>
+        Filtrar
+      </app-button>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading()" class="loading-state">
+    <i class="fas fa-spinner fa-spin"></i>
+    Cargando clientes...
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!loading() && customers().length === 0" class="empty-state">
+    <i class="fas fa-user-friends"></i>
+    <h3>No hay clientes</h3>
+    <p>No se encontraron clientes con los filtros seleccionados</p>
+  </div>
+
+  <!-- Customers Table -->
+  <div *ngIf="!loading() && customers().length > 0" class="table-card">
+    <table class="customers-table">
+      <thead>
+        <tr>
+          <th>Código</th>
+          <th>Nombre/Razón Social</th>
+          <th>Email</th>
+          <th>Tipo</th>
+          <th>RUC/NIT</th>
+          <th>Teléfono</th>
+          <th>Límite Crédito</th>
+          <th>Estado</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let customer of customers()">
+          <td>
+            <span class="customer-code">{{ customer.customer_code }}</span>
+          </td>
+          <td>
+            <div class="customer-info">
+              <strong>{{ customer.display_name }}</strong>
+              <span class="customer-contact" *ngIf="customer.contact_person">
+                {{ customer.contact_person }}
+              </span>
+            </div>
+          </td>
+          <td>{{ customer.email }}</td>
+          <td>
+            <span class="badge" [class]="customer.customer_type === 'BUSINESS' ? 'badge-business' : 'badge-individual'">
+              {{ getCustomerTypeLabel(customer.customer_type) }}
+            </span>
+          </td>
+          <td>{{ customer.tax_id || '-' }}</td>
+          <td>{{ customer.phone || '-' }}</td>
+          <td>
+            <span class="credit-limit">{{ formatCreditLimit(customer.credit_limit) }}</span>
+          </td>
+          <td>
+            <span class="badge" [ngClass]="getCustomerStatusClass(customer)">
+              {{ getCustomerStatusText(customer) }}
+            </span>
+          </td>
+          <td>
+            <div class="action-buttons">
+              <button
+                class="btn-action btn-view"
+                [routerLink]="['/customers', customer.id]"
+                title="Ver detalles">
+                <i class="fas fa-eye"></i>
+              </button>
+              <button
+                *ngIf="canEditCustomer()"
+                class="btn-action btn-edit"
+                [routerLink]="['/customers', customer.id, 'edit']"
+                title="Editar">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button
+                *ngIf="canEditCustomer()"
+                class="btn-action"
+                [class.btn-deactivate]="customer.is_active_customer"
+                [class.btn-activate]="!customer.is_active_customer"
+                (click)="toggleCustomerStatus(customer)"
+                [title]="customer.is_active_customer ? 'Desactivar' : 'Activar'">
+                <i class="fas" [class.fa-ban]="customer.is_active_customer" [class.fa-check]="!customer.is_active_customer"></i>
+              </button>
+              <button
+                *ngIf="canDeleteCustomer(customer)"
+                class="btn-action btn-delete"
+                (click)="confirmDelete(customer)"
+                title="Eliminar">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  <div *ngIf="!loading() && customers().length > 0" class="pagination">
+    <div class="pagination-info">
+      Mostrando {{ ((currentPage() - 1) * pageSize()) + 1 }} a {{ Math.min(currentPage() * pageSize(), totalCustomers()) }} de {{ totalCustomers() }} clientes
+    </div>
+    <div class="pagination-controls">
+      <button
+        class="page-btn"
+        [disabled]="currentPage() === 1"
+        (click)="onPageChange(currentPage() - 1)">
+        <i class="fas fa-chevron-left"></i>
+      </button>
+
+      <button
+        *ngFor="let page of pages"
+        class="page-btn"
+        [class.active]="page === currentPage()"
+        (click)="onPageChange(page)">
+        {{ page }}
+      </button>
+
+      <button
+        class="page-btn"
+        [disabled]="currentPage() === totalPages"
+        (click)="onPageChange(currentPage() + 1)">
+        <i class="fas fa-chevron-right"></i>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div *ngIf="showDeleteModal()" class="modal-overlay" (click)="showDeleteModal.set(false)">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>
+        <i class="fas fa-exclamation-triangle text-red-600"></i>
+        Confirmar Eliminación
+      </h3>
+      <button class="close-btn" (click)="showDeleteModal.set(false)">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <p>¿Está seguro de que desea eliminar el cliente?</p>
+      <div class="customer-delete-info">
+        <strong>{{ customerToDelete()?.display_name }}</strong>
+        <span>{{ customerToDelete()?.customer_code }}</span>
+        <span>{{ customerToDelete()?.email }}</span>
+      </div>
+      <p class="warning-text">Esta acción no se puede deshacer.</p>
+    </div>
+    <div class="modal-footer">
+      <app-button variant="secondary" (clicked)="showDeleteModal.set(false)">
+        Cancelar
+      </app-button>
+      <app-button variant="primary" (clicked)="deleteCustomer()">
+        <i class="fas fa-trash"></i>
+        Eliminar
+      </app-button>
+    </div>
+  </div>
+</div>

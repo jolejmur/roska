@@ -1,0 +1,21 @@
+---
+apiVersion: api.cerbos.dev/v1
+resourcePolicy:
+  version: "default"
+  resource: "function"
+  rules:
+    # Super Admin puede hacer TODO con funciones
+    - actions: ['create', 'read', 'update', 'delete', 'list']
+      effect: EFFECT_ALLOW
+      roles:
+        - "*"
+      condition:
+        match:
+          expr: request.principal.attr.is_superuser == true
+
+    # Cualquier usuario autenticado puede listar y leer funciones
+    # (necesario para construir el menú dinámico)
+    - actions: ['read', 'list']
+      effect: EFFECT_ALLOW
+      roles:
+        - "*"

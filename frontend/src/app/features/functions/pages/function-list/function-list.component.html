@@ -1,0 +1,187 @@
+<div class="function-list-container">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <h1 class="page-title">
+        <i class="fas fa-sitemap"></i>
+        Gestión de Funciones
+      </h1>
+      <p class="page-subtitle">
+        Administra las funciones del menú. Puedes editar el <strong>nombre</strong>, <strong>categoría</strong> y <strong>orden</strong>.
+      </p>
+    </div>
+  </div>
+
+  <!-- Info Card -->
+  <div class="info-card">
+    <i class="fas fa-info-circle"></i>
+    <div>
+      <strong>Nota:</strong> Las funciones son elementos del sistema.
+      Solo puedes modificar el <strong>nombre</strong> que aparece en el menú, la <strong>categoría</strong> a la que pertenece y el <strong>orden</strong> de visualización.
+    </div>
+  </div>
+
+  <!-- Table Card -->
+  <div class="table-card">
+    <div *ngIf="loading()" class="loading-state">
+      <i class="fas fa-spinner fa-spin"></i>
+      <p>Cargando funciones...</p>
+    </div>
+
+    <div *ngIf="!loading() && functions().length === 0" class="empty-state">
+      <i class="fas fa-exclamation-triangle"></i>
+      <h3>No se encontraron funciones</h3>
+      <p>No hay funciones configuradas en el sistema</p>
+    </div>
+
+    <div *ngIf="!loading() && functions().length > 0" class="table-responsive">
+      <table class="functions-table">
+        <thead>
+          <tr>
+            <th style="width: 60px;">Orden</th>
+            <th style="width: 60px;">Icono</th>
+            <th>Nombre (Editable)</th>
+            <th>Categoría (Editable)</th>
+            <th>Código</th>
+            <th>Recurso Cerbos</th>
+            <th>Ruta</th>
+            <th>Estado</th>
+            <th style="width: 180px;">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let func of functions()">
+            <!-- Order -->
+            <td>
+              <div *ngIf="!isEditing(func)" class="order-badge">
+                {{ func.order }}
+              </div>
+              <input
+                *ngIf="isEditing(func)"
+                type="number"
+                class="edit-input small"
+                [value]="editForm()!.order"
+                (input)="onOrderInput($event)"
+                min="0"
+                step="1">
+            </td>
+
+            <!-- Icon -->
+            <td>
+              <div class="icon-preview">
+                <i [class]="getIconClass(func.icon)"></i>
+              </div>
+            </td>
+
+            <!-- Name (Editable) -->
+            <td>
+              <div *ngIf="!isEditing(func)" class="function-name">
+                {{ func.name }}
+              </div>
+              <input
+                *ngIf="isEditing(func)"
+                type="text"
+                class="edit-input"
+                [value]="editForm()!.name"
+                (input)="onNameInput($event)">
+            </td>
+
+            <!-- Category (Editable) -->
+            <td>
+              <div *ngIf="!isEditing(func)" class="category-display">
+                <span class="category-badge" *ngIf="func.category_name">
+                  <i class="fas fa-folder"></i>
+                  {{ func.category_name }}
+                </span>
+                <span class="text-muted" *ngIf="!func.category_name">Sin categoría</span>
+              </div>
+              <select
+                *ngIf="isEditing(func)"
+                class="edit-select"
+                [value]="editForm()!.category || ''"
+                (change)="onCategoryChange($event)">
+                <option value="">Sin categoría</option>
+                <option *ngFor="let cat of categories()" [value]="cat.id">
+                  {{ cat.name }}
+                </option>
+              </select>
+            </td>
+
+            <!-- Code (Read-only) -->
+            <td>
+              <code class="code-badge">{{ getCodeDisplay(func.code) }}</code>
+            </td>
+
+            <!-- Cerbos Resource (Read-only) -->
+            <td>
+              <code class="code-badge resource-badge" *ngIf="func.cerbos_resource">
+                {{ func.cerbos_resource }}
+              </code>
+              <span class="text-muted" *ngIf="!func.cerbos_resource">N/A</span>
+            </td>
+
+            <!-- Route (Read-only) -->
+            <td class="text-muted">{{ getRouteDisplay(func.url) }}</td>
+
+            <!-- Status -->
+            <td>
+              <span
+                class="status-badge"
+                [class.status-active]="func.is_active"
+                [class.status-inactive]="!func.is_active">
+                <i class="fas" [class.fa-check-circle]="func.is_active" [class.fa-times-circle]="!func.is_active"></i>
+                {{ func.is_active ? 'Activo' : 'Inactivo' }}
+              </span>
+            </td>
+
+            <!-- Actions -->
+            <td>
+              <div class="action-buttons">
+                <div *ngIf="!isEditing(func)">
+                  <button
+                    class="action-btn btn-edit"
+                    (click)="startEdit(func)"
+                    title="Editar nombre y orden">
+                    <i class="fas fa-edit"></i>
+                    Editar
+                  </button>
+                </div>
+
+                <div *ngIf="isEditing(func)" class="edit-actions">
+                  <button
+                    class="action-btn btn-save"
+                    (click)="saveEdit(func)"
+                    title="Guardar cambios">
+                    <i class="fas fa-check"></i>
+                    Guardar
+                  </button>
+                  <button
+                    class="action-btn btn-cancel"
+                    (click)="cancelEdit()"
+                    title="Cancelar">
+                    <i class="fas fa-times"></i>
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Legend -->
+  <div class="legend-card">
+    <h4>Campos del Sistema</h4>
+    <ul>
+      <li><strong>Código:</strong> Identificador único de la función (no editable)</li>
+      <li><strong>Recurso Cerbos:</strong> Nombre del recurso en Cerbos para control de permisos (no editable)</li>
+      <li><strong>Ruta:</strong> URL de navegación en Angular (no editable)</li>
+      <li><strong>Icono:</strong> Clase CSS del icono (no editable)</li>
+      <li><strong>Nombre:</strong> Texto que aparece en el menú lateral (<span class="editable-marker">✏ Editable</span>)</li>
+      <li><strong>Categoría:</strong> Categoría a la que pertenece la función (<span class="editable-marker">✏ Editable</span>)</li>
+      <li><strong>Orden:</strong> Orden de aparición en el menú (<span class="editable-marker">✏ Editable</span>)</li>
+    </ul>
+  </div>
+</div>

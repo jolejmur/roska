@@ -1,0 +1,309 @@
+<div class="customer-form-container">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <h1 class="page-title">
+        <i class="fas" [class.fa-plus]="!isEditMode()" [class.fa-edit]="isEditMode()"></i>
+        {{ isEditMode() ? 'Editar Cliente' : 'Nuevo Cliente' }}
+      </h1>
+      <p class="page-subtitle">
+        {{ isEditMode() ? 'Actualiza la información del cliente' : 'Completa el formulario para crear un nuevo cliente' }}
+      </p>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading()" class="loading-state">
+    <i class="fas fa-spinner fa-spin"></i>
+    Cargando...
+  </div>
+
+  <!-- Form -->
+  <div *ngIf="!loading()" class="form-card">
+    <form (ngSubmit)="onSubmit()">
+      <!-- Basic Information -->
+      <div class="form-section">
+        <h3 class="section-title">
+          <i class="fas fa-user"></i>
+          Información Básica
+        </h3>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Email *</label>
+            <input
+              type="email"
+              [(ngModel)]="customerForm.email"
+              name="email"
+              required
+              [disabled]="isEditMode()">
+          </div>
+
+          <div class="form-group">
+            <label>Username *</label>
+            <input
+              type="text"
+              [(ngModel)]="customerForm.username"
+              name="username"
+              required
+              [disabled]="isEditMode()">
+          </div>
+        </div>
+
+        <div class="form-row" *ngIf="!isEditMode()">
+          <div class="form-group">
+            <label>Contraseña *</label>
+            <input
+              type="password"
+              [(ngModel)]="customerForm.password"
+              name="password"
+              required
+              minlength="8"
+              placeholder="Mínimo 8 caracteres">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Nombre</label>
+            <input
+              type="text"
+              [(ngModel)]="customerForm.first_name"
+              name="first_name">
+          </div>
+
+          <div class="form-group">
+            <label>Apellido</label>
+            <input
+              type="text"
+              [(ngModel)]="customerForm.last_name"
+              name="last_name">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>CI</label>
+            <input
+              type="text"
+              [(ngModel)]="customerForm.ci"
+              name="ci">
+          </div>
+
+          <div class="form-group">
+            <label>Teléfono</label>
+            <input
+              type="text"
+              [(ngModel)]="customerForm.phone"
+              name="phone">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Fecha de Nacimiento</label>
+            <input
+              type="date"
+              [(ngModel)]="customerForm.birth_date"
+              name="birth_date">
+          </div>
+        </div>
+      </div>
+
+      <!-- Customer Type -->
+      <div class="form-section">
+        <h3 class="section-title">
+          <i class="fas fa-building"></i>
+          Tipo de Cliente
+        </h3>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Tipo de Cliente *</label>
+            <select [(ngModel)]="customerForm.customer_type" name="customer_type" required>
+              <option value="INDIVIDUAL">Persona Natural</option>
+              <option value="BUSINESS">Empresa</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>RUC/NIT</label>
+            <input
+              type="text"
+              [(ngModel)]="customerForm.tax_id"
+              name="tax_id">
+          </div>
+        </div>
+
+        <div *ngIf="isBusinessCustomer">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Razón Social *</label>
+              <input
+                type="text"
+                [(ngModel)]="customerForm.company_name"
+                name="company_name"
+                [required]="isBusinessCustomer">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Persona de Contacto</label>
+              <input
+                type="text"
+                [(ngModel)]="customerForm.contact_person"
+                name="contact_person">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Address Information -->
+      <div class="form-section">
+        <h3 class="section-title">
+          <i class="fas fa-map-marker-alt"></i>
+          Dirección
+        </h3>
+
+        <div class="form-row">
+          <div class="form-group full-width">
+            <label>Dirección</label>
+            <input
+              type="text"
+              [(ngModel)]="customerForm.address"
+              name="address">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Ciudad</label>
+            <input
+              type="text"
+              [(ngModel)]="customerForm.city"
+              name="city">
+          </div>
+
+          <div class="form-group">
+            <label>País</label>
+            <input
+              type="text"
+              [(ngModel)]="customerForm.country"
+              name="country"
+              value="Bolivia">
+          </div>
+        </div>
+      </div>
+
+      <!-- Financial Information -->
+      <div class="form-section">
+        <h3 class="section-title">
+          <i class="fas fa-money-bill-wave"></i>
+          Información Financiera
+        </h3>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Límite de Crédito (Bs.)</label>
+            <input
+              type="number"
+              [(ngModel)]="customerForm.credit_limit"
+              name="credit_limit"
+              min="0"
+              step="0.01">
+          </div>
+
+          <div class="form-group">
+            <label>Términos de Pago (días)</label>
+            <input
+              type="number"
+              [(ngModel)]="customerForm.payment_terms"
+              name="payment_terms"
+              min="0">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Descuento (%)</label>
+            <input
+              type="number"
+              [(ngModel)]="customerForm.discount_percentage"
+              name="discount_percentage"
+              min="0"
+              max="100"
+              step="0.01">
+          </div>
+        </div>
+      </div>
+
+      <!-- Notes -->
+      <div class="form-section">
+        <h3 class="section-title">
+          <i class="fas fa-sticky-note"></i>
+          Notas
+        </h3>
+
+        <div class="form-row">
+          <div class="form-group full-width">
+            <label>Notas Internas</label>
+            <textarea
+              [(ngModel)]="customerForm.notes"
+              name="notes"
+              rows="4"
+              placeholder="Información adicional sobre el cliente..."></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- Status -->
+      <div class="form-section">
+        <h3 class="section-title">
+          <i class="fas fa-toggle-on"></i>
+          Estado
+        </h3>
+
+        <div class="form-row">
+          <div class="form-group checkbox-group">
+            <label>
+              <input
+                type="checkbox"
+                [(ngModel)]="customerForm.is_active_customer"
+                name="is_active_customer">
+              Cliente Activo
+            </label>
+
+            <label *ngIf="isEditMode()">
+              <input
+                type="checkbox"
+                [(ngModel)]="customerForm.is_active"
+                name="is_active">
+              Usuario Activo
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Form Actions -->
+      <div class="form-actions">
+        <app-button
+          variant="secondary"
+          type="button"
+          (clicked)="onCancel()"
+          [disabled]="saving()">
+          <i class="fas fa-times"></i>
+          Cancelar
+        </app-button>
+
+        <app-button
+          variant="primary"
+          type="submit"
+          [disabled]="saving()">
+          <i class="fas" [class.fa-spinner]="saving()" [class.fa-spin]="saving()" [class.fa-save]="!saving()"></i>
+          {{ saving() ? 'Guardando...' : (isEditMode() ? 'Guardar Cambios' : 'Crear Cliente') }}
+        </app-button>
+      </div>
+    </form>
+  </div>
+</div>

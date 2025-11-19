@@ -1,0 +1,203 @@
+<div class="category-list-container">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <h1 class="page-title">
+        <i class="fas fa-folder-open"></i>
+        Gestión de Categorías
+      </h1>
+      <p class="page-subtitle">
+        Administra las categorías del menú. Puedes editar <strong>nombre</strong>, <strong>descripción</strong>, <strong>icono</strong>, <strong>color</strong> y <strong>orden</strong>.
+      </p>
+    </div>
+  </div>
+
+  <!-- Info Card -->
+  <div class="info-card">
+    <i class="fas fa-info-circle"></i>
+    <div>
+      <strong>Nota:</strong> Las categorías sirven para agrupar funciones en el menú lateral.
+      Puedes personalizar todos los campos excepto el código (identificador único).
+    </div>
+  </div>
+
+  <!-- Table Card -->
+  <div class="table-card">
+    <div *ngIf="loading()" class="loading-state">
+      <i class="fas fa-spinner fa-spin"></i>
+      <p>Cargando categorías...</p>
+    </div>
+
+    <div *ngIf="!loading() && categories().length === 0" class="empty-state">
+      <i class="fas fa-exclamation-triangle"></i>
+      <h3>No se encontraron categorías</h3>
+      <p>No hay categorías configuradas en el sistema</p>
+    </div>
+
+    <div *ngIf="!loading() && categories().length > 0" class="table-responsive">
+      <table class="categories-table">
+        <thead>
+          <tr>
+            <th style="width: 60px;">Orden</th>
+            <th style="width: 60px;">Icono</th>
+            <th>Nombre (Editable)</th>
+            <th>Descripción (Editable)</th>
+            <th>Código</th>
+            <th style="width: 100px;">Color</th>
+            <th style="width: 120px;">Funciones</th>
+            <th>Estado</th>
+            <th style="width: 180px;">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let cat of categories()">
+            <!-- Order -->
+            <td>
+              <div *ngIf="!isEditing(cat)" class="order-badge">
+                {{ cat.order }}
+              </div>
+              <input
+                *ngIf="isEditing(cat)"
+                type="number"
+                class="edit-input small"
+                [value]="editForm()!.order"
+                (input)="onOrderInput($event)"
+                min="0"
+                step="1">
+            </td>
+
+            <!-- Icon -->
+            <td>
+              <div *ngIf="!isEditing(cat)" class="icon-preview" [style.background-color]="getColorDisplay(cat.color) + '20'">
+                <i [class]="getIconClass(cat.icon)" [style.color]="getColorDisplay(cat.color)"></i>
+              </div>
+              <div *ngIf="isEditing(cat)" class="icon-edit">
+                <input
+                  type="text"
+                  class="edit-input small"
+                  [value]="editForm()!.icon"
+                  (input)="onIconInput($event)"
+                  placeholder="fas fa-folder">
+              </div>
+            </td>
+
+            <!-- Name (Editable) -->
+            <td>
+              <div *ngIf="!isEditing(cat)" class="category-name">
+                {{ cat.name }}
+              </div>
+              <input
+                *ngIf="isEditing(cat)"
+                type="text"
+                class="edit-input"
+                [value]="editForm()!.name"
+                (input)="onNameInput($event)">
+            </td>
+
+            <!-- Description (Editable) -->
+            <td>
+              <div *ngIf="!isEditing(cat)" class="text-muted">
+                {{ cat.description || 'Sin descripción' }}
+              </div>
+              <input
+                *ngIf="isEditing(cat)"
+                type="text"
+                class="edit-input"
+                [value]="editForm()!.description"
+                (input)="onDescriptionInput($event)"
+                placeholder="Descripción de la categoría">
+            </td>
+
+            <!-- Code (Read-only) -->
+            <td>
+              <code class="code-badge">{{ getCodeDisplay(cat.code) }}</code>
+            </td>
+
+            <!-- Color (Editable) -->
+            <td>
+              <div *ngIf="!isEditing(cat)" class="color-preview">
+                <div class="color-swatch" [style.background-color]="getColorDisplay(cat.color)"></div>
+                <span class="color-hex">{{ getColorDisplay(cat.color) }}</span>
+              </div>
+              <input
+                *ngIf="isEditing(cat)"
+                type="color"
+                class="edit-color"
+                [value]="editForm()!.color || '#3498db'"
+                (input)="onColorInput($event)">
+            </td>
+
+            <!-- Functions Count -->
+            <td>
+              <span class="functions-count">
+                <i class="fas fa-sitemap"></i>
+                {{ getFunctionsCountDisplay(cat.active_functions_count) }}
+              </span>
+            </td>
+
+            <!-- Status -->
+            <td>
+              <span
+                class="status-badge"
+                [class.status-active]="cat.is_active"
+                [class.status-inactive]="!cat.is_active">
+                <i class="fas" [class.fa-check-circle]="cat.is_active" [class.fa-times-circle]="!cat.is_active"></i>
+                {{ cat.is_active ? 'Activa' : 'Inactiva' }}
+              </span>
+              <span *ngIf="cat.is_system" class="system-badge">
+                <i class="fas fa-lock"></i>
+                Sistema
+              </span>
+            </td>
+
+            <!-- Actions -->
+            <td>
+              <div class="action-buttons">
+                <div *ngIf="!isEditing(cat)">
+                  <button
+                    class="action-btn btn-edit"
+                    (click)="startEdit(cat)"
+                    title="Editar categoría">
+                    <i class="fas fa-edit"></i>
+                    Editar
+                  </button>
+                </div>
+
+                <div *ngIf="isEditing(cat)" class="edit-actions">
+                  <button
+                    class="action-btn btn-save"
+                    (click)="saveEdit(cat)"
+                    title="Guardar cambios">
+                    <i class="fas fa-check"></i>
+                    Guardar
+                  </button>
+                  <button
+                    class="action-btn btn-cancel"
+                    (click)="cancelEdit()"
+                    title="Cancelar">
+                    <i class="fas fa-times"></i>
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Legend -->
+  <div class="legend-card">
+    <h4>Campos de Categorías</h4>
+    <ul>
+      <li><strong>Código:</strong> Identificador único de la categoría (no editable)</li>
+      <li><strong>Nombre:</strong> Nombre que aparece en el menú (<span class="editable-marker">✏ Editable</span>)</li>
+      <li><strong>Descripción:</strong> Descripción de la categoría (<span class="editable-marker">✏ Editable</span>)</li>
+      <li><strong>Icono:</strong> Clase CSS del icono (ej: "fas fa-users") (<span class="editable-marker">✏ Editable</span>)</li>
+      <li><strong>Color:</strong> Color hex para personalizar la categoría (<span class="editable-marker">✏ Editable</span>)</li>
+      <li><strong>Orden:</strong> Orden de aparición en el menú (<span class="editable-marker">✏ Editable</span>)</li>
+      <li><strong>Funciones:</strong> Cantidad de funciones asignadas a esta categoría (solo lectura)</li>
+    </ul>
+  </div>
+</div>

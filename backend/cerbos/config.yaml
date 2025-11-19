@@ -1,0 +1,20 @@
+---
+server:
+  httpListenAddr: ":3592"
+  grpcListenAddr: ":3593"
+
+storage:
+  driver: "disk"
+  disk:
+    directory: /config/policies
+    watchForChanges: true
+
+# Habilitar playground para desarrollo
+auxData:
+  jwt:
+    disableVerification: false
+
+# Configuración de logs
+logging:
+  level: info
+  format: json

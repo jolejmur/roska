@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test API - Roska Radiadores</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .card {
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        button {
+            background: #8b5cf6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        button:hover {
+            background: #7c3aed;
+        }
+        #output {
+            background: #1f2937;
+            color: #10b981;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            max-height: 500px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        .success { color: #10b981; }
+        .error { color: #ef4444; }
+        .info { color: #3b82f6; }
+        h1 { color: #1f2937; }
+        h2 { color: #374151; font-size: 1.2em; margin-top: 0; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Test API - Roska Radiadores</h1>
+
+    <div class="card">
+        <h2>1. Autenticación</h2>
+        <button onclick="testLogin()">Test Login</button>
+        <button onclick="testGetCurrentUser()">Get Current User</button>
+    </div>
+
+    <div class="card">
+        <h2>2. Usuarios</h2>
+        <button onclick="testListUsers()">Listar Usuarios</button>
+        <button onclick="testGetUserPermissions()">Get Permissions</button>
+        <button onclick="testGetUserMenu()">Get Menu</button>
+    </div>
+
+    <div class="card">
+        <h2>📋 Output</h2>
+        <div id="output">Esperando comandos...</div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:8000/api';
+        let accessToken = null;
+
+        function log(message, type = 'info') {
+            const output = document.getElementById('output');
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type;
+            output.innerHTML += `<span class="${className}">[${timestamp}] ${message}</span>\n`;
+            output.scrollTop = output.scrollHeight;
+        }
+
+        function clearOutput() {
+            document.getElementById('output').innerHTML = '';
+        }
+
+        async function testLogin() {
+            clearOutput();
+            log('🔐 Intentando login como admin...', 'info');
+
+            try {
+                const response = await fetch(`${API_URL}/auth/login/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: 'admin@roska.com',
+                        password: 'admin123'
+                    })
+                });
+
+                log(`Status: ${response.status}`, response.ok ? 'success' : 'error');
+
+                if (response.ok) {
+                    const data = await response.json();
+                    accessToken = data.access;
+                    log('✅ Login exitoso!', 'success');
+                    log(`Token: ${accessToken.substring(0, 20)}...`, 'info');
+                    log(`User: ${data.user.username} (${data.user.email})`, 'info');
+                } else {
+                    const error = await response.text();
+                    log(`❌ Error: ${error}`, 'error');
+                }
+            } catch (error) {
+                log(`❌ Exception: ${error.message}`, 'error');
+            }
+        }
+
+        async function testListUsers() {
+            if (!accessToken) {
+                log('❌ Primero debes hacer login', 'error');
+                return;
+            }
+
+            clearOutput();
+            log('📋 Listando usuarios...', 'info');
+
+            try {
+                const response = await fetch(`${API_URL}/users/`, {
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`,
+                        'Content-Type': 'application/json',
+                    }
+                });
+
+                log(`Status: ${response.status}`, response.ok ? 'success' : 'error');
+
+                if (response.ok) {
+                    const data = await response.json();
+                    log('✅ Usuarios obtenidos:', 'success');
+                    log(JSON.stringify(data, null, 2), 'info');
+
+                    if (data.results) {
+                        log(`\n📊 Total: ${data.count} usuarios`, 'success');
+                        log(`📄 En esta página: ${data.results.length}`, 'info');
+                    } else if (Array.isArray(data)) {
+                        log(`\n📊 Total: ${data.length} usuarios`, 'success');
+                    }
+                } else {
+                    const error = await response.text();
+                    log(`❌ Error: ${error}`, 'error');
+                }
+            } catch (error) {
+                log(`❌ Exception: ${error.message}`, 'error');
+            }
+        }
+
+        async function testGetCurrentUser() {
+            if (!accessToken) {
+                log('❌ Primero debes hacer login', 'error');
+                return;
+            }
+
+            clearOutput();
+            log('👤 Obteniendo usuario actual...', 'info');
+
+            try {
+                const response = await fetch(`${API_URL}/users/me/`, {
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`,
+                        'Content-Type': 'application/json',
+                    }
+                });
+
+                log(`Status: ${response.status}`, response.ok ? 'success' : 'error');
+
+                if (response.ok) {
+                    const data = await response.json();
+                    log('✅ Usuario actual:', 'success');
+                    log(JSON.stringify(data, null, 2), 'info');
+                } else {
+                    const error = await response.text();
+                    log(`❌ Error: ${error}`, 'error');
+                }
+            } catch (error) {
+                log(`❌ Exception: ${error.message}`, 'error');
+            }
+        }
+
+        async function testGetUserPermissions() {
+            if (!accessToken) {
+                log('❌ Primero debes hacer login', 'error');
+                return;
+            }
+
+            clearOutput();
+            log('🔐 Obteniendo permisos del usuario...', 'info');
+
+            try {
+                const response = await fetch(`${API_URL}/users/me/permissions/`, {
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`,
+                        'Content-Type': 'application/json',
+                    }
+                });
+
+                log(`Status: ${response.status}`, response.ok ? 'success' : 'error');
+
+                if (response.ok) {
+                    const data = await response.json();
+                    log('✅ Permisos obtenidos:', 'success');
+                    log(JSON.stringify(data, null, 2), 'info');
+                } else {
+                    const error = await response.text();
+                    log(`❌ Error: ${error}`, 'error');
+                }
+            } catch (error) {
+                log(`❌ Exception: ${error.message}`, 'error');
+            }
+        }
+
+        async function testGetUserMenu() {
+            if (!accessToken) {
+                log('❌ Primero debes hacer login', 'error');
+                return;
+            }
+
+            clearOutput();
+            log('📋 Obteniendo menú del usuario...', 'info');
+
+            try {
+                const response = await fetch(`${API_URL}/users/me/menu/`, {
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`,
+                        'Content-Type': 'application/json',
+                    }
+                });
+
+                log(`Status: ${response.status}`, response.ok ? 'success' : 'error');
+
+                if (response.ok) {
+                    const data = await response.json();
+                    log('✅ Menú obtenido:', 'success');
+                    log(JSON.stringify(data, null, 2), 'info');
+
+                    log(`\n📊 Items del menú: ${data.length}`, 'success');
+                } else {
+                    const error = await response.text();
+                    log(`❌ Error: ${error}`, 'error');
+                }
+            } catch (error) {
+                log(`❌ Exception: ${error.message}`, 'error');
+            }
+        }
+
+        log('✅ Página cargada. Haz click en "Test Login" para empezar.', 'success');
+    </script>
+</body>
+</html>

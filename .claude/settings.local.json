@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(sc query:*)",
+      "Bash(venv/Scripts/python.exe:*)",
+      "Bash(taskkill //F //PID 35668)",
+      "Read(//c/**)",
+      "Bash(dir /b C:UsersJMRroska_radiadoresbackendapps)",
+      "Bash(dir:*)",
+      "Bash(\"venv\\Scripts\\python.exe\" manage.py shell:*)",
+      "Bash(\"venv\\Scripts\\python.exe\":*)",
+      "Bash(\"venv\\Scripts\\python.exe\" fix_profile_duplicates.py)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

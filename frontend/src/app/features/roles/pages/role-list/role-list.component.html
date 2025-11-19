@@ -1,0 +1,294 @@
+<div class="role-list-container">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <h1 class="page-title">
+        <i class="fas fa-user-shield"></i>
+        Gestión de Roles
+      </h1>
+      <p class="page-subtitle">
+        Un rol es un grupo de funciones que se asignan a usuarios para controlar sus permisos.
+      </p>
+    </div>
+    <button class="btn-primary" (click)="startCreating()" *ngIf="!isCreating()">
+      <i class="fas fa-plus"></i>
+      Crear Rol
+    </button>
+  </div>
+
+  <!-- Create Form -->
+  <div *ngIf="isCreating()" class="create-form-card">
+    <div class="form-header">
+      <h2><i class="fas fa-plus-circle"></i> Crear Nuevo Rol</h2>
+      <button class="btn-icon-close" (click)="cancelCreate()" title="Cerrar">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <form (ngSubmit)="createRole()" class="role-form">
+      <div class="form-group">
+        <label>Nombre *</label>
+        <input
+          type="text"
+          [(ngModel)]="newRole.name"
+          (ngModelChange)="onNameChange()"
+          name="name"
+          placeholder="Ej: Gerente de Ventas"
+          required>
+        <small class="form-hint">El código se generará automáticamente del nombre</small>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Código (auto-generado)</label>
+          <input
+            type="text"
+            [(ngModel)]="newRole.code"
+            name="code"
+            readonly
+            placeholder="Se genera automáticamente">
+        </div>
+
+        <div class="form-group">
+          <label>Rol Cerbos (auto-generado)</label>
+          <input
+            type="text"
+            [(ngModel)]="newRole.cerbos_role"
+            name="cerbos_role"
+            readonly
+            placeholder="Se genera automáticamente">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Descripción *</label>
+        <textarea
+          [(ngModel)]="newRole.description"
+          name="description"
+          rows="2"
+          placeholder="Descripción del rol..."
+          required></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Funciones Asignadas ({{ (newRole.function_ids?.length || 0) }} seleccionadas)</label>
+        <div class="functions-by-category">
+          <div *ngFor="let category of getFunctionsByCategory() | keyvalue" class="category-group">
+            <button
+              type="button"
+              class="category-header"
+              (click)="toggleCategoryCreate(category.key)">
+              <i [class]="isCategoryExpandedCreate(category.key) ? 'fas fa-chevron-down' : 'fas fa-chevron-right'"></i>
+              <span class="category-name">{{ category.key }}</span>
+              <span class="category-count">({{ category.value.length }} funciones)</span>
+            </button>
+            <div *ngIf="isCategoryExpandedCreate(category.key)" class="category-functions">
+              <div *ngFor="let func of category.value" class="function-checkbox">
+                <input
+                  type="checkbox"
+                  [id]="'new-func-' + func.id"
+                  [checked]="isFunctionSelected(func.id)"
+                  (change)="toggleFunctionForNew(func.id)">
+                <label [for]="'new-func-' + func.id">
+                  <i [class]="func.icon"></i>
+                  {{ func.name }}
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn-secondary" (click)="cancelCreate()">
+          <i class="fas fa-times"></i>
+          Cancelar
+        </button>
+        <button type="submit" class="btn-primary" [disabled]="!isFormValid()">
+          <i class="fas fa-check"></i>
+          Crear Rol
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Table Card -->
+  <div class="table-card">
+    <div *ngIf="loading()" class="loading-state">
+      <i class="fas fa-spinner fa-spin"></i>
+      <p>Cargando roles...</p>
+    </div>
+
+    <div *ngIf="error()" class="error-state">
+      <i class="fas fa-exclamation-circle"></i>
+      <p>{{ error() }}</p>
+    </div>
+
+    <div *ngIf="!loading() && !error() && roles().length === 0" class="empty-state">
+      <i class="fas fa-user-shield"></i>
+      <h3>No hay roles creados</h3>
+      <p>Crea el primer rol para comenzar</p>
+      <button class="btn-primary" (click)="startCreating()">
+        <i class="fas fa-plus"></i>
+        Crear Rol
+      </button>
+    </div>
+
+    <div *ngIf="!loading() && !error() && roles().length > 0" class="table-responsive">
+      <table class="roles-table">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Código</th>
+            <th>Descripción</th>
+            <th>Rol Cerbos</th>
+            <th style="width: 100px; text-align: center;">Funciones</th>
+            <th style="width: 100px; text-align: center;">Usuarios</th>
+            <th style="width: 100px;">Estado</th>
+            <th style="width: 150px;">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <ng-container *ngFor="let role of roles()">
+            <tr [class.editing-row]="isEditing(role)">
+              <!-- Name -->
+              <td>
+                <div *ngIf="!isEditing(role)" class="role-name">
+                  <i class="fas fa-user-shield"></i>
+                  {{ role.name }}
+                  <span *ngIf="role.is_system" class="badge badge-system">Sistema</span>
+                </div>
+                <input
+                  *ngIf="isEditing(role)"
+                  type="text"
+                  class="edit-input"
+                  [(ngModel)]="editForm()!.name">
+              </td>
+
+              <!-- Code -->
+              <td>
+                <code class="code-badge">{{ role.code }}</code>
+              </td>
+
+              <!-- Description -->
+              <td>
+                <div *ngIf="!isEditing(role)" class="description">
+                  {{ role.description }}
+                </div>
+                <textarea
+                  *ngIf="isEditing(role)"
+                  class="edit-textarea"
+                  [(ngModel)]="editForm()!.description"
+                  rows="2"></textarea>
+              </td>
+
+              <!-- Cerbos Role -->
+              <td>
+                <code class="code-badge">{{ role.cerbos_role }}</code>
+              </td>
+
+              <!-- Functions Count -->
+              <td style="text-align: center;">
+                <span class="badge badge-info">{{ role.functions_count || 0 }}</span>
+                <button
+                  *ngIf="!isEditing(role)"
+                  class="btn-icon-small"
+                  (click)="toggleFunctionsView(role.id)"
+                  [title]="expandedRoleId() === role.id ? 'Ocultar' : 'Ver funciones'">
+                  <i [class]="expandedRoleId() === role.id ? 'fas fa-chevron-up' : 'fas fa-chevron-down'"></i>
+                </button>
+              </td>
+
+              <!-- Users Count -->
+              <td style="text-align: center;">
+                <span class="badge badge-success">{{ role.users_count || 0 }}</span>
+              </td>
+
+              <!-- Status -->
+              <td>
+                <span class="status-badge" [class.active]="role.is_active" [class.inactive]="!role.is_active">
+                  {{ role.is_active ? 'Activo' : 'Inactivo' }}
+                </span>
+              </td>
+
+              <!-- Actions -->
+              <td class="actions-cell">
+                <div *ngIf="!isEditing(role)" class="action-buttons">
+                  <button
+                    class="btn-action edit"
+                    (click)="startEdit(role)"
+                    [disabled]="role.is_system"
+                    [title]="role.is_system ? 'No se pueden editar roles del sistema' : 'Editar'">
+                    <i class="fas fa-edit"></i>
+                  </button>
+                  <button
+                    class="btn-action delete"
+                    (click)="deleteRole(role)"
+                    [disabled]="role.is_system"
+                    [title]="role.is_system ? 'No se pueden eliminar roles del sistema' : 'Eliminar'">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </div>
+                <div *ngIf="isEditing(role)" class="action-buttons">
+                  <button class="btn-action save" (click)="saveEdit(role.id)" title="Guardar">
+                    <i class="fas fa-check"></i>
+                  </button>
+                  <button class="btn-action cancel" (click)="cancelEdit()" title="Cancelar">
+                    <i class="fas fa-times"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+
+            <!-- Expanded Functions Row -->
+            <tr *ngIf="expandedRoleId() === role.id" class="expanded-row">
+              <td colspan="8">
+                <div class="functions-detail">
+                  <h4><i class="fas fa-list"></i> Funciones asignadas ({{ role.functions_count || 0 }}):</h4>
+
+                  <div *ngIf="!isEditing(role) && role.functions && role.functions.length > 0" class="functions-grid">
+                    <div *ngFor="let func of role.functions" class="function-item">
+                      <i [class]="func.icon"></i>
+                      <span>{{ func.name }}</span>
+                      <code>{{ func.code }}</code>
+                    </div>
+                  </div>
+
+                  <div *ngIf="isEditing(role)" class="functions-edit-section">
+                    <div *ngFor="let category of getFunctionsByCategory() | keyvalue" class="category-group-edit">
+                      <button
+                        type="button"
+                        class="category-header-edit"
+                        (click)="toggleCategoryEdit(category.key)">
+                        <i [class]="isCategoryExpandedEdit(category.key) ? 'fas fa-chevron-down' : 'fas fa-chevron-right'"></i>
+                        <span class="category-name">{{ category.key }}</span>
+                        <span class="category-count">({{ category.value.length }})</span>
+                      </button>
+                      <div *ngIf="isCategoryExpandedEdit(category.key)" class="category-functions-edit">
+                        <div *ngFor="let func of category.value" class="function-checkbox-edit">
+                          <input
+                            type="checkbox"
+                            [id]="'edit-func-' + role.id + '-' + func.id"
+                            [checked]="isFunctionInEditForm(func.id)"
+                            (change)="toggleFunction(func.id)">
+                          <label [for]="'edit-func-' + role.id + '-' + func.id">
+                            <i [class]="func.icon"></i>
+                            {{ func.name }}
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <p *ngIf="!isEditing(role) && (!role.functions || role.functions.length === 0)" class="no-functions">
+                    No hay funciones asignadas a este rol.
+                  </p>
+                </div>
+              </td>
+            </tr>
+          </ng-container>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,319 @@
+<div class="user-list-container">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <h1 class="page-title">
+        <i class="fas fa-users"></i>
+        Gestión de Usuarios
+      </h1>
+      <p class="page-subtitle">Administra los usuarios del sistema</p>
+    </div>
+    <app-button
+      *ngIf="currentUser()?.is_superuser"
+      variant="primary"
+      (clicked)="onCreateUser()">
+      <i class="fas fa-plus"></i>
+      Nuevo Usuario
+    </app-button>
+  </div>
+
+  <!-- Create/Edit Form -->
+  <div *ngIf="showCreateModal() || showEditModal()" class="form-card">
+    <div class="form-header">
+      <h3>{{ showCreateModal() ? 'Crear Nuevo Usuario' : 'Editar Usuario' }}</h3>
+      <button class="close-btn" (click)="closeForm()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <form class="user-form" (ngSubmit)="onSubmitForm()">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Email *</label>
+          <input type="email" [(ngModel)]="userForm.email" name="email" required [disabled]="showEditModal()">
+        </div>
+        <div class="form-group">
+          <label>Username *</label>
+          <input type="text" [(ngModel)]="userForm.username" name="username" required [disabled]="showEditModal()">
+        </div>
+      </div>
+
+      <div class="form-row" *ngIf="showCreateModal()">
+        <div class="form-group">
+          <label>Password *</label>
+          <input type="password" [(ngModel)]="userForm.password" name="password" required>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Nombre</label>
+          <input type="text" [(ngModel)]="userForm.first_name" name="first_name">
+        </div>
+        <div class="form-group">
+          <label>Apellido</label>
+          <input type="text" [(ngModel)]="userForm.last_name" name="last_name">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>CI</label>
+          <input type="text" [(ngModel)]="userForm.ci" name="ci">
+        </div>
+        <div class="form-group">
+          <label>Teléfono</label>
+          <input type="text" [(ngModel)]="userForm.phone" name="phone">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Dirección</label>
+          <input type="text" [(ngModel)]="userForm.address" name="address">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Ciudad</label>
+          <input type="text" [(ngModel)]="userForm.city" name="city">
+        </div>
+        <div class="form-group">
+          <label>País</label>
+          <input type="text" [(ngModel)]="userForm.country" name="country" value="Bolivia">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Fecha de Nacimiento</label>
+          <input type="date" [(ngModel)]="userForm.birth_date" name="birth_date">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group checkbox-group">
+          <label>
+            <input type="checkbox" [(ngModel)]="userForm.is_staff" name="is_staff">
+            Es Staff
+          </label>
+          <label>
+            <input type="checkbox" [(ngModel)]="userForm.is_active" name="is_active">
+            Activo
+          </label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>
+          Roles Asignados ({{ userForm.role_ids?.length || 0 }} seleccionados)
+          <button type="button" class="btn-add-role" (click)="addRoleSelector()" title="Agregar otro rol">
+            <i class="fas fa-plus"></i>
+            Agregar rol
+          </button>
+        </label>
+        <div class="roles-selector-dynamic">
+          <div *ngFor="let roleId of selectedRoles; let i = index" class="role-select-row">
+            <div class="role-select-wrapper">
+              <i class="fas fa-user-shield role-icon"></i>
+              <select
+                class="role-select"
+                [value]="roleId || ''"
+                (change)="onRoleChange(i, $event)">
+                <option value="">Seleccionar rol...</option>
+                <option
+                  *ngFor="let role of getAvailableRolesForSelect(i)"
+                  [value]="role.id">
+                  {{ role.name }} ({{ role.code }})
+                </option>
+              </select>
+            </div>
+            <button
+              type="button"
+              class="btn-remove-role"
+              (click)="removeRoleSelector(i)"
+              [disabled]="!canRemoveRoleSelector()"
+              title="Eliminar este rol">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <app-button variant="secondary" type="button" (clicked)="closeForm()">
+          Cancelar
+        </app-button>
+        <app-button variant="primary" type="submit">
+          {{ showCreateModal() ? 'Crear Usuario' : 'Guardar Cambios' }}
+        </app-button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters-card">
+    <div class="search-box">
+      <i class="fas fa-search"></i>
+      <input
+        type="text"
+        placeholder="Buscar por nombre, email o username..."
+        [value]="searchTerm()"
+        (input)="onSearch($event)">
+    </div>
+
+    <div class="filter-group">
+      <label>Estado:</label>
+      <select [value]="filterStatus()" (change)="onFilterStatusChange($event)">
+        <option value="all">Todos</option>
+        <option value="active">Activos</option>
+        <option value="inactive">Inactivos</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label>Tipo:</label>
+      <select [value]="filterType()" (change)="onFilterTypeChange($event)">
+        <option value="all">Todos</option>
+        <option value="EMPLOYEE">Empleado</option>
+        <option value="CUSTOMER">Cliente</option>
+        <option value="SUPPLIER">Proveedor</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Table Card -->
+  <div class="table-card">
+    <div *ngIf="loading()" class="loading-state">
+      <i class="fas fa-spinner fa-spin"></i>
+      <p>Cargando usuarios...</p>
+    </div>
+
+    <div *ngIf="!loading() && users().length === 0" class="empty-state">
+      <i class="fas fa-users-slash"></i>
+      <h3>No se encontraron usuarios</h3>
+      <p>Intenta cambiar los filtros o crear un nuevo usuario</p>
+    </div>
+
+    <div *ngIf="!loading() && users().length > 0" class="table-responsive">
+      <table class="users-table">
+        <thead>
+          <tr>
+            <th>Usuario</th>
+            <th>Email</th>
+            <th>Roles</th>
+            <th>Estado</th>
+            <th>Fecha Registro</th>
+            <th class="actions-column">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let user of users()" [class.superuser-row]="user.is_superuser">
+            <td>
+              <div class="user-info">
+                <div class="user-avatar">
+                  {{ user.first_name[0] || user.username[0] }}{{ user.last_name[0] || '' }}
+                </div>
+                <div class="user-details">
+                  <div class="user-name">
+                    {{ user.full_name || user.username }}
+                    <span *ngIf="user.is_superuser" class="superuser-badge" title="Super Administrador">
+                      <i class="fas fa-crown"></i>
+                    </span>
+                  </div>
+                  <div class="user-username">{{ '@' + user.username }}</div>
+                </div>
+              </div>
+            </td>
+            <td>{{ user.email }}</td>
+            <td>
+              <div class="roles-display">
+                <span *ngIf="user.roles && user.roles.length > 0; else noRoles">
+                  <span *ngFor="let role of user.roles" class="badge badge-primary" style="margin-right: 0.25rem;">
+                    {{ role.name }}
+                  </span>
+                </span>
+                <ng-template #noRoles>
+                  <span class="text-muted">Sin roles asignados</span>
+                </ng-template>
+              </div>
+            </td>
+            <td>
+              <span
+                class="status-badge"
+                [class.status-active]="user.is_active"
+                [class.status-inactive]="!user.is_active">
+                <i class="fas" [class.fa-check-circle]="user.is_active" [class.fa-times-circle]="!user.is_active"></i>
+                {{ user.is_active ? 'Activo' : 'Inactivo' }}
+              </span>
+            </td>
+            <td>
+              {{ user.date_joined ? (user.date_joined | date: 'dd/MM/yyyy') : 'N/A' }}
+            </td>
+            <td class="actions-column">
+              <div class="action-buttons">
+                <button
+                  *ngIf="canEdit(user)"
+                  class="action-btn btn-edit"
+                  (click)="onEditUser(user)"
+                  title="Editar usuario">
+                  <i class="fas fa-edit"></i>
+                </button>
+
+                <button
+                  *ngIf="!user.is_superuser && currentUser()?.is_superuser"
+                  class="action-btn btn-toggle"
+                  (click)="onToggleStatus(user)"
+                  [title]="user.is_active ? 'Desactivar' : 'Activar'">
+                  <i class="fas" [class.fa-toggle-on]="user.is_active" [class.fa-toggle-off]="!user.is_active"></i>
+                </button>
+
+                <button
+                  *ngIf="canDelete(user)"
+                  class="action-btn btn-delete"
+                  (click)="onDeleteUser(user)"
+                  title="Eliminar usuario">
+                  <i class="fas fa-trash"></i>
+                </button>
+
+                <div *ngIf="user.is_superuser" class="protected-user" title="Super Admin - No se puede editar ni eliminar">
+                  <i class="fas fa-shield-alt"></i>
+                  Protegido
+                </div>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div *ngIf="!loading() && users().length > 0" class="pagination">
+      <div class="pagination-info">
+        Mostrando {{ (currentPage() - 1) * pageSize() + 1 }} - {{ Math.min(currentPage() * pageSize(), totalUsers()) }} de {{ totalUsers() }} usuarios
+      </div>
+
+      <div class="pagination-controls">
+        <button
+          class="pagination-btn"
+          [disabled]="currentPage() === 1"
+          (click)="onPageChange(currentPage() - 1)">
+          <i class="fas fa-chevron-left"></i>
+        </button>
+
+        <span class="page-indicator">
+          Página {{ currentPage() }} de {{ getTotalPages() }}
+        </span>
+
+        <button
+          class="pagination-btn"
+          [disabled]="currentPage() >= getTotalPages()"
+          (click)="onPageChange(currentPage() + 1)">
+          <i class="fas fa-chevron-right"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modals will be added later -->

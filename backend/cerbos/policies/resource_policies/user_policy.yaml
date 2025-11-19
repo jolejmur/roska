@@ -1,0 +1,23 @@
+---
+apiVersion: api.cerbos.dev/v1
+resourcePolicy:
+  version: "default"
+  resource: "user"
+  rules:
+    # Super Admin puede hacer TODO con cualquier usuario
+    - actions: ['create', 'read', 'update', 'delete', 'list']
+      effect: EFFECT_ALLOW
+      roles:
+        - "*"
+      condition:
+        match:
+          expr: request.principal.attr.is_superuser == true
+
+    # Cualquier usuario puede ver y actualizar SOLO su propio perfil
+    - actions: ['read', 'update']
+      effect: EFFECT_ALLOW
+      roles:
+        - "*"
+      condition:
+        match:
+          expr: request.resource.id == request.principal.id

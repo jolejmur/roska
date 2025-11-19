@@ -1,0 +1,51 @@
+:host {
+  display: block;
+  min-height: 100vh;
+  background-color: #f8fafc; // Fondo gris muy suave para toda la página
+}
+
+/* Animaciones de entrada */
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Estilos específicos para la Tabla de Items */
+.items-grid {
+  display: grid;
+  grid-template-columns: 80px 1fr 140px 140px 50px; // Cantidad | Desc | Precio | Total | Accion
+  gap: 1rem;
+  align-items: center;
+  
+  /* Mobile: Transformar grid a bloque/tarjeta */
+  @media (max-width: 768px) {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    background: white;
+    padding: 1rem;
+    border-radius: 0.75rem;
+    border: 1px solid #e2e8f0;
+    margin-bottom: 1rem;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  }
+}
+
+/* Inputs personalizados dentro de la tabla para que se vean "integrados" */
+.table-input {
+  @apply w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm py-2 px-3 bg-white;
+  transition: all 0.2s;
+  
+  &:disabled {
+    @apply bg-gray-50 text-gray-500 border-gray-200 cursor-not-allowed;
+  }
+}
+
+/* Totales */
+.summary-card {
+  background: linear-gradient(to bottom right, #ffffff, #f8fafc);
+}

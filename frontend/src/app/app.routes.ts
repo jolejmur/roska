@@ -52,6 +52,10 @@ export const routes: Routes = [
         path: 'categories',
         loadChildren: () =>
           import('./features/categories/categories.routes').then(m => m.categoriesRoutes)
+      },
+      {
+        path: 'commercial',
+        loadChildren: () => import('./features/commercial/commercial.routes').then(m => m.COMMERCIAL_ROUTES)
       }
       // Las demas rutas se crean dinamicamente desde el backend via el menu
     ]
